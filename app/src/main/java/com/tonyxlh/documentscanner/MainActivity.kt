@@ -6,12 +6,14 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -42,8 +44,9 @@ class MainActivity : ComponentActivity() {
             DocumentScannerTheme {
                 // A surface container using the 'background' color from the theme
                 Surface(
-                    modifier = Modifier.fillMaxSize().
-                                        padding(10.dp),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(10.dp),
                 ) {
                     Box(modifier = Modifier.fillMaxSize()) {
                         Column(
@@ -72,7 +75,12 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun DocumentItem(doc: Document) {
-    Row(modifier = Modifier.padding(all = 8.dp)) {
+    Row(modifier = Modifier
+        .padding(all = 8.dp)
+        .fillMaxWidth()
+        .clickable(onClick = {
+           Log.d("DBR","item clicked");
+        })) {
         Image(
             painter = painterResource(R.drawable.thumbnail),
             contentDescription = null,
