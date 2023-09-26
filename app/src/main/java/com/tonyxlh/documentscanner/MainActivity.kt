@@ -1,5 +1,6 @@
 package com.tonyxlh.documentscanner
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -35,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -52,6 +54,7 @@ class MainActivity : ComponentActivity() {
                         .fillMaxSize()
                         .padding(5.dp),
                 ) {
+                    val context = LocalContext.current
                     Box(modifier = Modifier.fillMaxSize()) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
@@ -70,6 +73,7 @@ class MainActivity : ComponentActivity() {
                                 .padding(all = 16.dp)
                                 .align(alignment = Alignment.BottomEnd),
                             onClick = {
+                                context.startActivity(Intent(context, ScannerActivity::class.java))
                                 Log.d("DBR","clicked");
                             }
                         ) {

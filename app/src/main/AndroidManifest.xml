@@ -13,6 +13,11 @@
         android:theme="@style/Theme.DocumentScanner"
         tools:targetApi="31">
         <activity
+            android:name=".ScannerActivity"
+            android:exported="false"
+            android:label="@string/title_activity_scanner"
+            android:theme="@style/Theme.DocumentScanner" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
