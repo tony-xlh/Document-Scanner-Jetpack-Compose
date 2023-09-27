@@ -17,9 +17,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -86,6 +90,7 @@ class ScannerActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScannerSettingsDialog(onDismissRequest: () -> Unit,scanners:MutableList<Scanner>) {
     var expanded by remember { mutableStateOf(false) }
@@ -105,30 +110,38 @@ fun ScannerSettingsDialog(onDismissRequest: () -> Unit,scanners:MutableList<Scan
                     Text(
                         text = "Scanners:"
                     )
-                    Button(onClick = {
-                        expanded = true
-                    }){
-                        Text(
-                            text = selectedScanner,
-                        )
-                    }
-
-                    DropdownMenu(
+                    ExposedDropdownMenuBox(
                         expanded = expanded,
-                        onDismissRequest = { expanded = false },
+                        onExpandedChange = {
+                            expanded = !expanded
+                        }
                     ) {
-                        scanners.forEach { doc ->
-                            DropdownMenuItem(
-                                text = { Text(doc.name) },
-                                onClick = { Toast.makeText(context, doc.name, Toast.LENGTH_SHORT).show() }
-                            )
+                        TextField(
+                            value = selectedScanner,
+                            onValueChange = {},
+                            readOnly = true,
+                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                            modifier = Modifier.menuAnchor(),
+                            singleLine = true
+                        )
+
+                        ExposedDropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            scanners.forEach { scanner ->
+                                DropdownMenuItem(
+                                    text = { Text(text = scanner.name) },
+                                    onClick = {
+                                        selectedScanner = scanner.name
+                                        expanded = false
+                                    }
+                                )
+                            }
                         }
                     }
                 }
-
             }
-
-
         }
     }
 }
