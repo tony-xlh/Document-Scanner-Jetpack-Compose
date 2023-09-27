@@ -124,7 +124,8 @@ class ScannerActivity : ComponentActivity() {
                             items(images.size){
                                 Image(
                                     bitmap = images.get(it).asImageBitmap(),
-                                    contentDescription = ""
+                                    contentDescription = "",
+                                    modifier = Modifier.padding(10.dp)
                                 )
                             }
                         }
