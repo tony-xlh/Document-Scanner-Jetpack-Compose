@@ -31,7 +31,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -41,7 +40,6 @@ import com.tonyxlh.docscan4j.DeviceConfiguration
 import com.tonyxlh.docscan4j.DynamsoftService
 import com.tonyxlh.docscan4j.Scanner
 import com.tonyxlh.documentscanner.ui.theme.DocumentScannerTheme
-
 
 class ScannerActivity : ComponentActivity() {
     var scanConfig:ScanConfig? = null
@@ -158,8 +156,10 @@ class ScannerActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ScannerSettingsDialog(onDismissRequest: (scanConfig:ScanConfig?) -> Unit,currentScanConfig:ScanConfig?, scanners:List<Scanner>) {
-    var expanded by remember { mutableStateOf(false) }
+    var scannedExpanded by remember { mutableStateOf(false) }
+    var pixelTypesExpanded by remember { mutableStateOf(false) }
     var selectedScannerName by remember { mutableStateOf("") }
+    var selectedPixelType by remember { mutableStateOf("Black & White") }
     var selectedScanner:Scanner? = null
     var deviceConfig:DeviceConfiguration = DeviceConfiguration()
     var pixelType:CapabilitySetup = CapabilitySetup()
@@ -168,39 +168,46 @@ fun ScannerSettingsDialog(onDismissRequest: (scanConfig:ScanConfig?) -> Unit,cur
         selectedScannerName = selectedScanner.name
         deviceConfig = currentScanConfig.deviceConfig
         pixelType = currentScanConfig.pixelType
+        if (pixelType.curValue == 1){
+            selectedPixelType = "Gray"
+        }else if (pixelType.curValue == 2) {
+            selectedPixelType = "Color"
+        }
+    }else{
+        pixelType.curValue = 0
+        pixelType.exception = "ignore"
+        pixelType.capability = 257
     }
     Dialog(onDismissRequest = { onDismissRequest(null) }) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(300.dp)
                 .padding(16.dp),
         ) {
             Column(
                 modifier = Modifier.padding(15.dp)
             ) {
-
                 Text(
                     text = "Scanners:",
                 )
                 ExposedDropdownMenuBox(
-                    expanded = expanded,
+                    expanded = scannedExpanded,
                     onExpandedChange = {
-                        expanded = !expanded
+                        scannedExpanded = !scannedExpanded
                     }
                 ) {
                     TextField(
                         value = selectedScannerName,
                         onValueChange = {},
                         readOnly = true,
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = scannedExpanded) },
                         modifier = Modifier.menuAnchor(),
                         singleLine = true
                     )
-
                     ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
+                        expanded = scannedExpanded,
+                        onDismissRequest = { scannedExpanded = false }
                     ) {
                         scanners.forEach { scanner ->
                             DropdownMenuItem(
@@ -208,10 +215,57 @@ fun ScannerSettingsDialog(onDismissRequest: (scanConfig:ScanConfig?) -> Unit,cur
                                 onClick = {
                                     selectedScanner = scanner
                                     selectedScannerName = scanner.name
-                                    expanded = false
+                                    scannedExpanded = false
                                 }
                             )
                         }
+                    }
+                }
+                Text(
+                    text = "Pixel Type:",
+                )
+                ExposedDropdownMenuBox(
+                    expanded = pixelTypesExpanded,
+                    onExpandedChange = {
+                        pixelTypesExpanded = !pixelTypesExpanded
+                    }
+                ) {
+                    TextField(
+                        value = selectedPixelType,
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = pixelTypesExpanded) },
+                        modifier = Modifier.menuAnchor(),
+                        singleLine = true
+                    )
+                    ExposedDropdownMenu(
+                        expanded = pixelTypesExpanded,
+                        onDismissRequest = { pixelTypesExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(text = "Black & White") },
+                            onClick = {
+                                selectedPixelType = "Black & White"
+                                pixelType.curValue = 0
+                                pixelTypesExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = "Gray") },
+                            onClick = {
+                                selectedPixelType = "Gray"
+                                pixelType.curValue = 1
+                                pixelTypesExpanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(text = "Color") },
+                            onClick = {
+                                selectedPixelType = "Color"
+                                pixelType.curValue = 2
+                                pixelTypesExpanded = false
+                            }
+                        )
                     }
                 }
                 Button(onClick = {
