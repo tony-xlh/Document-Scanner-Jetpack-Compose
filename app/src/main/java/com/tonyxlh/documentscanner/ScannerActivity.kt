@@ -9,11 +9,16 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -92,38 +97,43 @@ class ScannerActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     Column {
-                        Button(
-                            onClick = {
-                                Log.d("DM",scanConfig.toString())
-                                val scanned = scan()
-                                var newImages = mutableStateListOf<Bitmap>()
-                                images.forEach {
-                                    newImages.add(it)
-                                }
-                                scanned.forEach {
-                                    newImages.add(it)
-                                }
-                                images = newImages
-
-                            }
-                        ){
-                            Text("Scan")
-                        }
-                        Button(
-                            onClick = {
-                                openDialog.value = true;
-                            }
-                        ){
-                            Text("Scan Settings")
-                        }
-                        when {
-                            openDialog.value -> {
-                                ScannerSettingsDialog({
-                                    if (it != null) {
-                                        scanConfig = it
+                        Row (
+                            modifier = Modifier.padding(5.dp)
+                        ) {
+                            Button(
+                                onClick = {
+                                    Log.d("DM",scanConfig.toString())
+                                    val scanned = scan()
+                                    var newImages = mutableStateListOf<Bitmap>()
+                                    images.forEach {
+                                        newImages.add(it)
                                     }
-                                    openDialog.value = false
-                                }, scanConfig, scanners)
+                                    scanned.forEach {
+                                        newImages.add(it)
+                                    }
+                                    images = newImages
+
+                                }
+                            ){
+                                Text("Scan")
+                            }
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Button(
+                                onClick = {
+                                    openDialog.value = true;
+                                }
+                            ){
+                                Icon(imageVector = Icons.Default.Settings, contentDescription = null)
+                            }
+                            when {
+                                openDialog.value -> {
+                                    ScannerSettingsDialog({
+                                        if (it != null) {
+                                            scanConfig = it
+                                        }
+                                        openDialog.value = false
+                                    }, scanConfig, scanners)
+                                }
                             }
                         }
                         LazyColumn {
