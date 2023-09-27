@@ -97,10 +97,10 @@ class ScannerActivity : ComponentActivity() {
                                 Log.d("DM",scanConfig.toString())
                                 val scanned = scan()
                                 var newImages = mutableStateListOf<Bitmap>()
-                                scanned.forEach {
+                                images.forEach {
                                     newImages.add(it)
                                 }
-                                images.forEach {
+                                scanned.forEach {
                                     newImages.add(it)
                                 }
                                 images = newImages
