@@ -1,5 +1,6 @@
 package com.tonyxlh.documentscanner
 
+import android.graphics.Paint.Cap
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -46,7 +47,7 @@ import com.tonyxlh.docscan4j.Scanner
 import com.tonyxlh.documentscanner.ui.theme.DocumentScannerTheme
 
 class ScannerActivity : ComponentActivity() {
-    lateinit var scanConfig:ScanConfig
+    var scanConfig:ScanConfig? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -60,6 +61,12 @@ class ScannerActivity : ComponentActivity() {
                     Thread {
                         try {
                             scanners = service.getScanners();
+                            if (scanners.size>0) {
+                                scanConfig = ScanConfig(scanners.get(0),
+                                    DeviceConfiguration(),
+                                    Capabilities()
+                                )
+                            }
                             Log.d("DM", scanners.size.toString())
                         }catch (e:Exception){
                             Log.d("DM",e.stackTraceToString())
@@ -76,16 +83,26 @@ class ScannerActivity : ComponentActivity() {
                     Column {
                         Button(
                             onClick = {
+                                Log.d("DM",scanConfig.toString())
+                            }
+                        ){
+                            Text("Scan")
+                        }
+                        Button(
+                            onClick = {
                                 openDialog.value = true;
                             }
                         ){
-                            Text("Settings")
+                            Text("Scan Settings")
                         }
                         when {
                             openDialog.value -> {
                                 ScannerSettingsDialog({
+                                    if (it != null) {
+                                        scanConfig = it
+                                    }
                                     openDialog.value = false
-                                },scanners)
+                                },scanConfig,scanners)
                             }
                         }
                     }
@@ -97,10 +114,19 @@ class ScannerActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ScannerSettingsDialog(onDismissRequest: () -> Unit,scanners:MutableList<Scanner>) {
+fun ScannerSettingsDialog(onDismissRequest: (scanConfig:ScanConfig?) -> Unit,currentScanConfig:ScanConfig?, scanners:MutableList<Scanner>) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedScanner by remember { mutableStateOf("") }
-    Dialog(onDismissRequest = { onDismissRequest() }) {
+    var selectedScannerName by remember { mutableStateOf("") }
+    var selectedScanner:Scanner? = null
+    var deviceConfig:DeviceConfiguration = DeviceConfiguration()
+    var caps:Capabilities = Capabilities()
+    if (currentScanConfig != null){
+        selectedScanner = currentScanConfig.scanner
+        selectedScannerName = selectedScanner.name
+        deviceConfig = currentScanConfig.deviceConfig
+        caps = currentScanConfig.caps
+    }
+    Dialog(onDismissRequest = { onDismissRequest(null) }) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -121,7 +147,7 @@ fun ScannerSettingsDialog(onDismissRequest: () -> Unit,scanners:MutableList<Scan
                     }
                 ) {
                     TextField(
-                        value = selectedScanner,
+                        value = selectedScannerName,
                         onValueChange = {},
                         readOnly = true,
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -137,12 +163,23 @@ fun ScannerSettingsDialog(onDismissRequest: () -> Unit,scanners:MutableList<Scan
                             DropdownMenuItem(
                                 text = { Text(text = scanner.name) },
                                 onClick = {
-                                    selectedScanner = scanner.name
+                                    selectedScanner = scanner
+                                    selectedScannerName = scanner.name
                                     expanded = false
                                 }
                             )
                         }
                     }
+                }
+                Button(onClick = {
+                    if (selectedScanner != null) {
+                        val scanConfig = ScanConfig(selectedScanner!!,deviceConfig,caps)
+                        onDismissRequest(scanConfig)
+                    }else{
+                        onDismissRequest(null)
+                    }
+                }) {
+                    Text("Save")
                 }
             }
         }
