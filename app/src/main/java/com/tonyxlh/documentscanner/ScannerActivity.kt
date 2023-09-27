@@ -60,29 +60,29 @@ class ScannerActivity : ComponentActivity() {
         var selectedImageIndex:Int = -1
         setContent {
             LaunchedEffect(key1 = true){
-                    Log.d("DM","request start")
-                    Thread {
-                        try {
-                            var newScanners = mutableStateListOf<Scanner>()
-                            service.getScanners().forEach {
-                                newScanners.add(it)
-                            }
-                            scanners = newScanners
-                            if (scanners.size>0) {
-                                var pixelType = CapabilitySetup()
-                                pixelType.capability=257
-                                pixelType.curValue=0
-                                pixelType.exception="ignore"
-                                scanConfig = ScanConfig(scanners.get(0),
-                                    DeviceConfiguration(),
-                                    pixelType
-                                )
-                            }
-                            Log.d("DM", scanners.size.toString())
-                        }catch (e:Exception){
-                            Log.d("DM",e.stackTraceToString())
+                Log.d("DM","request start")
+                Thread {
+                    try {
+                        var newScanners = mutableStateListOf<Scanner>()
+                        service.getScanners().forEach {
+                            newScanners.add(it)
                         }
-                    }.start()
+                        scanners = newScanners
+                        if (scanners.size>0) {
+                            var pixelType = CapabilitySetup()
+                            pixelType.capability=257
+                            pixelType.curValue=0
+                            pixelType.exception="ignore"
+                            scanConfig = ScanConfig(scanners.get(0),
+                                DeviceConfiguration(),
+                                pixelType
+                            )
+                        }
+                        Log.d("DM", scanners.size.toString())
+                    }catch (e:Exception){
+                        Log.d("DM",e.stackTraceToString())
+                    }
+                }.start()
             }
             DocumentScannerTheme {
                 val deleteConfirmationAlertDialog = remember { mutableStateOf(false) }
