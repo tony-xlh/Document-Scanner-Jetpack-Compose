@@ -5,12 +5,14 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -37,11 +39,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.tonyxlh.docscan4j.Capabilities
+import com.tonyxlh.docscan4j.DeviceConfiguration
 import com.tonyxlh.docscan4j.DynamsoftService
 import com.tonyxlh.docscan4j.Scanner
 import com.tonyxlh.documentscanner.ui.theme.DocumentScannerTheme
 
 class ScannerActivity : ComponentActivity() {
+    lateinit var scanConfig:ScanConfig
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -95,49 +100,47 @@ class ScannerActivity : ComponentActivity() {
 fun ScannerSettingsDialog(onDismissRequest: () -> Unit,scanners:MutableList<Scanner>) {
     var expanded by remember { mutableStateOf(false) }
     var selectedScanner by remember { mutableStateOf("") }
-    val context = LocalContext.current
-
     Dialog(onDismissRequest = { onDismissRequest() }) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
                 .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
         ) {
-            Column {
-                Row {
-                    Text(
-                        text = "Scanners:"
-                    )
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = {
-                            expanded = !expanded
-                        }
-                    ) {
-                        TextField(
-                            value = selectedScanner,
-                            onValueChange = {},
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            modifier = Modifier.menuAnchor(),
-                            singleLine = true
-                        )
+            Column(
+                modifier = Modifier.padding(15.dp)
+            ) {
 
-                        ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            scanners.forEach { scanner ->
-                                DropdownMenuItem(
-                                    text = { Text(text = scanner.name) },
-                                    onClick = {
-                                        selectedScanner = scanner.name
-                                        expanded = false
-                                    }
-                                )
-                            }
+                Text(
+                    text = "Scanners:",
+                )
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = {
+                        expanded = !expanded
+                    }
+                ) {
+                    TextField(
+                        value = selectedScanner,
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier.menuAnchor(),
+                        singleLine = true
+                    )
+
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        scanners.forEach { scanner ->
+                            DropdownMenuItem(
+                                text = { Text(text = scanner.name) },
+                                onClick = {
+                                    selectedScanner = scanner.name
+                                    expanded = false
+                                }
+                            )
                         }
                     }
                 }
