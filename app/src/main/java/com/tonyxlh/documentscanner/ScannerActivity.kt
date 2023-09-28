@@ -88,11 +88,7 @@ class ScannerActivity : ComponentActivity() {
                 Log.d("DM","request start")
                 if (intent.hasExtra("date")) {
                     date = intent.getLongExtra("date",date)
-                    val thread = Thread() {
-                        images = manager.getDocument(date).images
-                    }
-                    thread.start()
-                    thread.join()
+                    images = manager.getDocument(date).images
                 }
 
                 var scannersFound = loadScanners()
@@ -227,11 +223,7 @@ class ScannerActivity : ComponentActivity() {
     }
 
     fun saveDocument(manager: DocumentManager,images:List<String>){
-        val thread = Thread(){
-            manager.saveDocument(Document(date,images))
-        }
-        thread.start()
-        thread.join()
+        manager.saveDocument(Document(date,images))
     }
 
 }
