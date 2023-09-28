@@ -36,6 +36,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -107,18 +108,16 @@ fun DocumentItem(doc: Document) {
 
         Column {
             Text(
-                text = doc.name,
+                text = doc.date.toString(),
                 color = MaterialTheme.colorScheme.secondary
             )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = doc.date.toString())
         }
     }
 }
 
 fun sampleDocuments(): MutableList<Document> {
     val docs = mutableListOf<Document>();
-    docs.add(Document(1695714698605,"Document 1"));
-    docs.add(Document(1695714799615,"Document 2"));
+    docs.add(Document(1695714698605, listOf<ImageBitmap>()))
+    docs.add(Document(1695714799615, listOf<ImageBitmap>()))
     return docs
 }

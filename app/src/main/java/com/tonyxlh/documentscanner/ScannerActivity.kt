@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -42,8 +43,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.tonyxlh.docscan4j.Capabilities
@@ -52,6 +55,7 @@ import com.tonyxlh.docscan4j.DeviceConfiguration
 import com.tonyxlh.docscan4j.DynamsoftService
 import com.tonyxlh.docscan4j.Scanner
 import com.tonyxlh.documentscanner.ui.theme.DocumentScannerTheme
+import java.util.Date
 
 class ScannerActivity : ComponentActivity() {
     var scanConfig:ScanConfig? = null
@@ -59,13 +63,16 @@ class ScannerActivity : ComponentActivity() {
         "http://192.168.8.65:18622",
         "t0068MgAAAEm8KzOlKD/AG56RuTf2RSTo4ajLgVpDBfQkmIJYY7yrDj3jbzQpRfQRzGnACr7S1F/7Da6REO20jmF3QR4VDXI="
     )
+    var date = Date().time
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var images by mutableStateOf(emptyList<Bitmap>())
+        var images by mutableStateOf(emptyList<ImageBitmap>())
         var openDialog = mutableStateOf(false)
         var scanners by mutableStateOf(emptyList<Scanner>())
         var selectedImageIndex:Int = -1
         setContent {
+            val context = LocalContext.current
+            val manager = DocumentManager(context)
             LaunchedEffect(key1 = true){
                 Log.d("DM","request start")
                 Thread {
@@ -106,12 +113,12 @@ class ScannerActivity : ComponentActivity() {
                                 onClick = {
                                     Log.d("DM",scanConfig.toString())
                                     val scanned = scan()
-                                    var newImages = mutableStateListOf<Bitmap>()
+                                    var newImages = mutableStateListOf<ImageBitmap>()
                                     images.forEach {
                                         newImages.add(it)
                                     }
                                     scanned.forEach {
-                                        newImages.add(it)
+                                        newImages.add(it.asImageBitmap())
                                     }
                                     images = newImages
 
@@ -130,6 +137,8 @@ class ScannerActivity : ComponentActivity() {
                             Spacer(modifier = Modifier.width(10.dp))
                             Button(
                                 onClick = {
+                                    manager.saveDocument(Document(date,images))
+                                    Toast.makeText(context,"Saved",Toast.LENGTH_SHORT).show()
                             }) {
                                 Text("Save")
                             }
@@ -147,7 +156,7 @@ class ScannerActivity : ComponentActivity() {
                         LazyColumn {
                             items(images.size){
                                 Image(
-                                    bitmap = images.get(it).asImageBitmap(),
+                                    bitmap = images.get(it),
                                     contentDescription = "",
                                     modifier = Modifier
                                         .padding(10.dp)
@@ -167,7 +176,7 @@ class ScannerActivity : ComponentActivity() {
                                     {
 
                                         deleteConfirmationAlertDialog.value = false
-                                        var newImages = mutableStateListOf<Bitmap>()
+                                        var newImages = mutableStateListOf<ImageBitmap>()
                                         for (i in 0..images.size-1) {
                                             if (i != selectedImageIndex) {
                                                 newImages.add(images.get(i))
