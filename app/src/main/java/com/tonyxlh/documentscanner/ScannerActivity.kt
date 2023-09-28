@@ -134,6 +134,7 @@ class ScannerActivity : ComponentActivity() {
                                         }
                                         images = newImages
                                         saveDocument(manager,images)
+                                        listState.animateScrollToItem(index = images.size - 1)
                                     }
                                 }
                             ){
@@ -158,7 +159,7 @@ class ScannerActivity : ComponentActivity() {
                                 }
                             }
                         }
-                        LazyColumn {
+                        LazyColumn(state = listState) {
                             items(images.size){
                                 Image(
                                     bitmap = manager.readFileAsImageBitmapByName(date,images.get(it)),
