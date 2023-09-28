@@ -354,7 +354,7 @@ fun ScannerSettingsDialog(onDismissRequest: (scanConfig:ScanConfig?) -> Unit,cur
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConfirmationAlertDialog(
+public fun ConfirmationAlertDialog(
     onDismissRequest: () -> Unit,
     onConfirmation: () -> Unit,
     dialogTitle: String,

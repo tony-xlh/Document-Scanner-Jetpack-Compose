@@ -3,6 +3,7 @@ package com.tonyxlh.documentscanner
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.util.Log
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
@@ -71,7 +72,14 @@ class DocumentManager {
         var externalFilesDir = context.getExternalFilesDir("")
         var documentFolder = File(externalFilesDir,"doc-"+date.toString())
         if (documentFolder.exists()) {
+            deleteFilesWithin(documentFolder)
             documentFolder.delete()
+        }
+    }
+
+    private fun deleteFilesWithin(folder:File){
+        folder.listFiles().forEach {
+            it.delete()
         }
     }
 

@@ -24,6 +24,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -35,7 +38,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,7 +84,9 @@ class MainActivity : ComponentActivity() {
                                 },
                             )
                             documentTimestamps.forEach { timestamp ->
-                                DocumentItem(timestamp,manager)
+                                DocumentItem(timestamp,manager,{
+                                    documentTimestamps = manager.listDocuments()
+                                })
                             }
                         }
                         FloatingActionButton(
@@ -101,15 +108,16 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DocumentItem(date:Long,manager: DocumentManager) {
+fun DocumentItem(date:Long,manager: DocumentManager,onDeleted: (date:Long) -> Unit) {
     val context = LocalContext.current
+    var deleteConfirmationAlertDialog by remember {  mutableStateOf(false)}
     Row(modifier = Modifier
         .padding(all = 8.dp)
         .fillMaxWidth()
         .clickable(onClick = {
-            Log.d("DBR","item clicked");
+            Log.d("DBR", "item clicked");
             var intent = Intent(context, ScannerActivity::class.java)
-            intent.putExtra("date",date)
+            intent.putExtra("date", date)
             context.startActivity(intent)
         })) {
         Image(
@@ -123,12 +131,33 @@ fun DocumentItem(date:Long,manager: DocumentManager) {
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        Column {
-            Text(
-                text = formattedDate(date),
-                color = MaterialTheme.colorScheme.secondary
-            )
+        Text(
+            text = formattedDate(date),
+            color = MaterialTheme.colorScheme.secondary
+        )
+        IconButton(
+            onClick = {
+                deleteConfirmationAlertDialog = true
+            }
+        ){
+            Icon(imageVector = Icons.Default.Delete, contentDescription = null)
         }
+        when {
+            deleteConfirmationAlertDialog -> {
+                ConfirmationAlertDialog(
+                    {
+                        deleteConfirmationAlertDialog = false
+                    },
+                    {
+                        deleteConfirmationAlertDialog = false
+                        manager.removeDocument(date)
+                        Log.d("DM","delete")
+                        onDeleted(date)
+                    },"Alert","Delete this document?")
+            }
+        }
+
+
     }
 }
 
