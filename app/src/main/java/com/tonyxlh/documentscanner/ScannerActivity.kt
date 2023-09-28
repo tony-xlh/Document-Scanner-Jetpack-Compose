@@ -1,8 +1,10 @@
 package com.tonyxlh.documentscanner
 
 import android.Manifest
+import android.R.attr.bitmap
 import android.content.ContentValues
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -132,6 +134,25 @@ class ScannerActivity : ComponentActivity() {
                     }
                 }
             )
+            val cameraLauncher =
+                rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
+                    if (it != null) {
+                        val stream = ByteArrayOutputStream()
+                        it!!.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+                        val name = manager.saveOneImage(date,stream.toByteArray())
+                        var newImages = mutableListOf<String>()
+                        images.forEach {
+                            newImages.add(it)
+                        }
+                        newImages.add(name)
+                        images = newImages
+                        saveDocument(manager,images)
+                        coroutineScope.launch{
+                            listState.animateScrollToItem(index = images.size - 1)
+                        }
+
+                    }
+                }
             LaunchedEffect(key1 = true){
                 Log.d("DM","request start")
                 launcher.launch(Manifest.permission.CAMERA)
@@ -176,6 +197,7 @@ class ScannerActivity : ComponentActivity() {
                                     val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
                                     cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cam_uri)
                                     startCamera.launch(cameraIntent)
+                                    //cameraLauncher.launch(null)
                                 }
                             }) {
                                  Text("Camera")
