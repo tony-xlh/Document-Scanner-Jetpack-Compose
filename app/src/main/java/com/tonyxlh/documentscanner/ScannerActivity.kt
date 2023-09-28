@@ -56,6 +56,12 @@ import com.tonyxlh.docscan4j.DeviceConfiguration
 import com.tonyxlh.docscan4j.DynamsoftService
 import com.tonyxlh.docscan4j.Scanner
 import com.tonyxlh.documentscanner.ui.theme.DocumentScannerTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Date
 
 class ScannerActivity : ComponentActivity() {
@@ -111,17 +117,20 @@ class ScannerActivity : ComponentActivity() {
                         ) {
                             Button(
                                 onClick = {
-                                    Log.d("DM",scanConfig.toString())
-                                    val scanned = scan(manager)
-                                    var newImages = mutableListOf<String>()
-                                    images.forEach {
-                                        newImages.add(it)
+                                    val scope = CoroutineScope(Job() + Dispatchers.IO)
+                                    scope.launch {
+                                        Log.d("DM",scanConfig.toString())
+                                        val scanned = scan(manager)
+                                        var newImages = mutableListOf<String>()
+                                        images.forEach {
+                                            newImages.add(it)
+                                        }
+                                        scanned.forEach {
+                                            newImages.add(it)
+                                        }
+                                        images = newImages
+                                        saveDocument(manager,images)
                                     }
-                                    scanned.forEach {
-                                        newImages.add(it)
-                                    }
-                                    images = newImages
-                                    saveDocument(manager,images)
                                 }
                             ){
                                 Text("Scan")
@@ -186,25 +195,19 @@ class ScannerActivity : ComponentActivity() {
         }
     }
 
-    fun loadScanners():MutableList<Scanner>{
+    suspend fun loadScanners():MutableList<Scanner>{
         var newScanners = mutableListOf<Scanner>()
-        val thread = Thread {
-            try {
-                service.getScanners().forEach {
-                    newScanners.add(it)
-                }
-            }catch (e:Exception){
-                Log.d("DM",e.stackTraceToString())
+        withContext(Dispatchers.IO) {
+            service.getScanners().forEach {
+                newScanners.add(it)
             }
         }
-        thread.start()
-        thread.join()
         return newScanners
     }
 
-    fun scan(manager: DocumentManager): MutableList<String> {
+    suspend fun scan(manager: DocumentManager): MutableList<String> {
         var images = mutableListOf<String>();
-        val t = Thread {
+        withContext(Dispatchers.IO) {
             var caps = Capabilities()
             caps.capabilities.add(scanConfig!!.pixelType)
             val jobID = service.createScanJob(scanConfig!!.scanner,scanConfig!!.deviceConfig,caps)
@@ -215,8 +218,6 @@ class ScannerActivity : ComponentActivity() {
                 image = service.nextDocument(jobID)
             }
         }
-        t.start()
-        t.join()
         return images
     }
 
