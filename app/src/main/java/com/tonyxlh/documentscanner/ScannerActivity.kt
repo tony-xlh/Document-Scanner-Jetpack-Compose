@@ -78,7 +78,11 @@ class ScannerActivity : ComponentActivity() {
                 Log.d("DM","request start")
                 if (intent.hasExtra("date")) {
                     date = intent.getLongExtra("date",date)
-                    images = manager.getDocument(date).images
+                    val thread = Thread() {
+                        images = manager.getDocument(date).images
+                    }
+                    thread.start()
+                    thread.join()
                 }
 
                 var scannersFound = loadScanners()
@@ -132,7 +136,11 @@ class ScannerActivity : ComponentActivity() {
                             Spacer(modifier = Modifier.width(10.dp))
                             Button(
                                 onClick = {
-                                    manager.saveDocument(Document(date,images))
+                                    val thread = Thread(){
+                                        manager.saveDocument(Document(date,images))
+                                    }
+                                    thread.start()
+                                    thread.join()
                                     Toast.makeText(context,"Saved",Toast.LENGTH_SHORT).show()
                             }) {
                                 Text("Save")
