@@ -3,6 +3,7 @@ package com.tonyxlh.documentscanner
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Canvas
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.content.ContextCompat
@@ -97,15 +98,29 @@ class DocumentManager {
             if (filesList.size>index) {
                 val name = filesList.get(index)
                 val file = File(documentFolder, name)
-                val bytes = file.readBytes()
-                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                return bitmap.asImageBitmap()
+                if (file.exists()) {
+                    val bytes = file.readBytes()
+                    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    return bitmap.asImageBitmap()
+                }
             }
         }
+        return getEmptyThumbNail()
+    }
+
+    private fun getEmptyThumbNail():ImageBitmap{
         val db = ContextCompat.getDrawable(context, R.drawable.thumbnail)
-        return Bitmap.createBitmap(
-            db!!.intrinsicWidth, db.intrinsicHeight, Bitmap.Config.ARGB_8888
-        ).asImageBitmap()
+        var bit = Bitmap.createBitmap(
+            db!!.intrinsicWidth, db.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        // on below line we are
+        // creating a variable for canvas.
+        val canvas = Canvas(bit)
+        // on below line we are setting bounds for our bitmap.
+        db.setBounds(0, 0, canvas.width, canvas.height)
+        // on below line we are simply
+        // calling draw to draw our canvas.
+        db.draw(canvas)
+        return bit.asImageBitmap()
     }
 
     fun readFileAsImageBitmapByName(date: Long, name: String): ImageBitmap {
@@ -113,14 +128,13 @@ class DocumentManager {
         var documentFolder = File(externalFilesDir, "doc-" + date.toString())
         if (documentFolder.exists()) {
             val file = File(documentFolder,name)
-            val bytes = file.readBytes()
-            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-            return bitmap.asImageBitmap()
+            if (file.exists()) {
+                val bytes = file.readBytes()
+                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                return bitmap.asImageBitmap()
+            }
         }
-        val db = ContextCompat.getDrawable(context, R.drawable.thumbnail)
-        return Bitmap.createBitmap(
-            db!!.intrinsicWidth, db.intrinsicHeight, Bitmap.Config.ARGB_8888
-        ).asImageBitmap()
+        return getEmptyThumbNail()
     }
 
     fun saveOneImage(date:Long,image:ByteArray):String{
