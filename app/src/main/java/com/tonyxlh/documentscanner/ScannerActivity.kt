@@ -206,10 +206,14 @@ class ScannerActivity : ComponentActivity() {
 
     suspend fun loadScanners():MutableList<Scanner>{
         var newScanners = mutableListOf<Scanner>()
-        withContext(Dispatchers.IO) {
-            service.getScanners().forEach {
-                newScanners.add(it)
+        try {
+            withContext(Dispatchers.IO) {
+                service.getScanners().forEach {
+                    newScanners.add(it)
+                }
             }
+        }catch (e:Exception){
+            e.printStackTrace()
         }
         return newScanners
     }
@@ -217,14 +221,18 @@ class ScannerActivity : ComponentActivity() {
     suspend fun scan(manager: DocumentManager): MutableList<String> {
         var images = mutableListOf<String>();
         withContext(Dispatchers.IO) {
-            var caps = Capabilities()
-            caps.capabilities.add(scanConfig!!.pixelType)
-            val jobID = service.createScanJob(scanConfig!!.scanner,scanConfig!!.deviceConfig,caps)
-            var image = service.nextDocument(jobID)
-            while (image != null) {
-                val name = manager.saveOneImage(date, image)
-                images.add(name)
-                image = service.nextDocument(jobID)
+            try {
+                var caps = Capabilities()
+                caps.capabilities.add(scanConfig!!.pixelType)
+                val jobID = service.createScanJob(scanConfig!!.scanner,scanConfig!!.deviceConfig,caps)
+                var image = service.nextDocument(jobID)
+                while (image != null) {
+                    val name = manager.saveOneImage(date, image)
+                    images.add(name)
+                    image = service.nextDocument(jobID)
+                }
+            }catch (e:Exception){
+                e.printStackTrace()
             }
         }
         return images
