@@ -135,6 +135,7 @@ fun DocumentItem(date:Long,manager: DocumentManager,onDeleted: (date:Long) -> Un
     var deleteConfirmationAlertDialog by remember {  mutableStateOf(false)}
     Row(modifier = Modifier
         .padding(all = 8.dp)
+        .height(56.dp)
         .fillMaxWidth()
         .clickable(onClick = {
             Log.d("DBR", "item clicked");
