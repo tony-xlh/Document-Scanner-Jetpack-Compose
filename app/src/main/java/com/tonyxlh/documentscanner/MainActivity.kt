@@ -47,6 +47,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tonyxlh.docscan4j.Scanner
 import com.tonyxlh.documentscanner.ui.theme.DocumentScannerTheme
+import java.text.SimpleDateFormat
+import java.time.format.DateTimeFormatter
+import java.util.Date
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -122,9 +125,16 @@ fun DocumentItem(date:Long,manager: DocumentManager) {
 
         Column {
             Text(
-                text = date.toString(),
+                text = formattedDate(date),
                 color = MaterialTheme.colorScheme.secondary
             )
         }
     }
+}
+
+fun formattedDate(timestamp:Long):String{
+    var date = Date(timestamp)
+    val f1 = SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
+    val s2 = f1.format(date)
+    return s2
 }
