@@ -32,6 +32,7 @@ class DocumentManager {
         var externalFilesDir = context.getExternalFilesDir("")
         var documentFolder = File(externalFilesDir,"doc-"+doc.date.toString())
         if (documentFolder.exists()) {
+            deleteFilesWithin(documentFolder)
             documentFolder.delete()
         }
         documentFolder.mkdir()
