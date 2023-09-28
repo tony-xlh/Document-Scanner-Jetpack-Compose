@@ -134,4 +134,13 @@ class DocumentManager {
         imageFile.writeBytes(image)
         return imageFile.name
     }
+
+    fun deleteImage(date:Long,name:String) {
+        var externalFilesDir = context.getExternalFilesDir("")
+        var documentFolder = File(externalFilesDir,"doc-"+date.toString())
+        if (documentFolder.exists()) {
+            var imageFile = File(documentFolder, name)
+            imageFile.delete()
+        }
+    }
 }

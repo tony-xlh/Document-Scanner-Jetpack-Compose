@@ -136,11 +136,7 @@ class ScannerActivity : ComponentActivity() {
                             Spacer(modifier = Modifier.width(10.dp))
                             Button(
                                 onClick = {
-                                    val thread = Thread(){
-                                        manager.saveDocument(Document(date,images))
-                                    }
-                                    thread.start()
-                                    thread.join()
+                                    saveDocument(manager,images)
                                     Toast.makeText(context,"Saved",Toast.LENGTH_SHORT).show()
                             }) {
                                 Text("Save")
@@ -180,12 +176,14 @@ class ScannerActivity : ComponentActivity() {
 
                                         deleteConfirmationAlertDialog.value = false
                                         var newImages = mutableStateListOf<String>()
+                                        manager.deleteImage(date,images.get(selectedImageIndex))
                                         for (i in 0..images.size-1) {
                                             if (i != selectedImageIndex) {
                                                 newImages.add(images.get(i))
                                             }
                                         }
                                         images = newImages
+                                        saveDocument(manager,images)
                                     },"Alert","Delete this image?")
                             }
                         }
@@ -227,6 +225,14 @@ class ScannerActivity : ComponentActivity() {
         t.start()
         t.join()
         return images
+    }
+
+    fun saveDocument(manager: DocumentManager,images:List<String>){
+        val thread = Thread(){
+            manager.saveDocument(Document(date,images))
+        }
+        thread.start()
+        thread.join()
     }
 
 }
