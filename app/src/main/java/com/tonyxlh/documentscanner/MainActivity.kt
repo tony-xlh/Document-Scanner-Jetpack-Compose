@@ -99,11 +99,15 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun DocumentItem(date:Long,manager: DocumentManager) {
+    val context = LocalContext.current
     Row(modifier = Modifier
         .padding(all = 8.dp)
         .fillMaxWidth()
         .clickable(onClick = {
-           Log.d("DBR","item clicked");
+            Log.d("DBR","item clicked");
+            var intent = Intent(context, ScannerActivity::class.java)
+            intent.putExtra("date",date)
+            context.startActivity(intent)
         })) {
         Image(
             bitmap = manager.getFirstDocumentImage(date)!!,

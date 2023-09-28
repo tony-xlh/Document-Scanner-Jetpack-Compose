@@ -75,6 +75,11 @@ class ScannerActivity : ComponentActivity() {
             val manager = DocumentManager(context)
             LaunchedEffect(key1 = true){
                 Log.d("DM","request start")
+                if (intent.hasExtra("date")) {
+                    date = intent.getLongExtra("date",date)
+                    images = manager.getDocument(date).images
+                }
+
                 var scannersFound = loadScanners()
                 scanners = scannersFound
                 if (scanners.size>0) {
