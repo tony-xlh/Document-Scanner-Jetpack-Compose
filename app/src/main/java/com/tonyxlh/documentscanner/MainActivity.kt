@@ -33,6 +33,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,21 +45,27 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.tonyxlh.docscan4j.Scanner
 import com.tonyxlh.documentscanner.ui.theme.DocumentScannerTheme
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        var documentTimestamps by mutableStateOf(emptyList<Long>())
         setContent {
             DocumentScannerTheme {
+                val context = LocalContext.current
+                val manager = DocumentManager(context)
+                LaunchedEffect(key1 = true){
+                    documentTimestamps = manager.listDocuments()
+                }
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(5.dp),
                 ) {
-                    val context = LocalContext.current
                     Box(modifier = Modifier.fillMaxSize()) {
                         Column(
                             modifier = Modifier.fillMaxSize(),
@@ -65,8 +75,8 @@ class MainActivity : ComponentActivity() {
                                     Text("Document Scanner")
                                 },
                             )
-                            sampleDocuments().forEach { doc ->
-                                DocumentItem(doc)
+                            documentTimestamps.forEach { timestamp ->
+                                DocumentItem(timestamp)
                             }
                         }
                         FloatingActionButton(
@@ -88,7 +98,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DocumentItem(doc: Document) {
+fun DocumentItem(date:Long) {
     Row(modifier = Modifier
         .padding(all = 8.dp)
         .fillMaxWidth()
@@ -108,16 +118,9 @@ fun DocumentItem(doc: Document) {
 
         Column {
             Text(
-                text = doc.date.toString(),
+                text = date.toString(),
                 color = MaterialTheme.colorScheme.secondary
             )
         }
     }
-}
-
-fun sampleDocuments(): MutableList<Document> {
-    val docs = mutableListOf<Document>();
-    docs.add(Document(1695714698605, listOf<ImageBitmap>()))
-    docs.add(Document(1695714799615, listOf<ImageBitmap>()))
-    return docs
 }
