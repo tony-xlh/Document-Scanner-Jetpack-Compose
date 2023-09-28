@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -41,6 +42,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -80,6 +82,8 @@ class ScannerActivity : ComponentActivity() {
         setContent {
             val context = LocalContext.current
             val manager = DocumentManager(context)
+            val listState = rememberLazyListState()
+            val coroutineScope = rememberCoroutineScope()
             LaunchedEffect(key1 = true){
                 Log.d("DM","request start")
                 if (intent.hasExtra("date")) {
@@ -117,8 +121,8 @@ class ScannerActivity : ComponentActivity() {
                         ) {
                             Button(
                                 onClick = {
-                                    val scope = CoroutineScope(Job() + Dispatchers.IO)
-                                    scope.launch {
+                                    //val scope = CoroutineScope(Job() + Dispatchers.IO)
+                                    coroutineScope.launch {
                                         Log.d("DM",scanConfig.toString())
                                         val scanned = scan(manager)
                                         var newImages = mutableListOf<String>()
