@@ -1,15 +1,21 @@
 package com.tonyxlh.documentscanner
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
+import android.Manifest
+import android.content.ContentValues
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultCallback
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,10 +53,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.tonyxlh.docscan4j.Capabilities
@@ -59,13 +61,13 @@ import com.tonyxlh.docscan4j.DeviceConfiguration
 import com.tonyxlh.docscan4j.DynamsoftService
 import com.tonyxlh.docscan4j.Scanner
 import com.tonyxlh.documentscanner.ui.theme.DocumentScannerTheme
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 import java.util.Date
+
 
 class ScannerActivity : ComponentActivity() {
     var scanConfig:ScanConfig? = null
@@ -81,13 +83,58 @@ class ScannerActivity : ComponentActivity() {
         var scanners by mutableStateOf(emptyList<Scanner>())
         var selectedImageIndex:Int = -1
         var status = mutableStateOf("")
+        var cam_uri: Uri? = null
+        val context = applicationContext
+        val manager = DocumentManager(context)
+        var startCamera: ActivityResultLauncher<Intent> =
+            registerForActivityResult(
+                ActivityResultContracts.StartActivityForResult(),
+                ActivityResultCallback<ActivityResult> { result ->
+                    if (result.getResultCode() === RESULT_OK) {
+                        // There are no request codes
+                        Log.d("DM",cam_uri.toString())
+                        if (cam_uri != null) {
+                            val inp: InputStream? = contentResolver.openInputStream(cam_uri!!)
+                            if (inp != null) {
+                                val byteBuffer = ByteArrayOutputStream()
+                                val bufferSize = 1024
+                                val buffer = ByteArray(bufferSize)
+                                var len = 0
+                                while (inp.read(buffer).also { len = it } != -1) {
+                                    byteBuffer.write(buffer, 0, len)
+                                }
+                                val name = manager.saveOneImage(date,byteBuffer.toByteArray())
+                                var newImages = mutableListOf<String>()
+                                images.forEach {
+                                    newImages.add(it)
+                                }
+                                newImages.add(name)
+                                images = newImages
+                                saveDocument(manager,images)
+                                //listState.animateScrollToItem(index = images.size - 1)
+                            }
+                        }
+
+
+
+                    }
+                }
+            )
+
         setContent {
-            val context = LocalContext.current
-            val manager = DocumentManager(context)
+
             val listState = rememberLazyListState()
             val coroutineScope = rememberCoroutineScope()
+            val launcher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission(),
+                onResult = { granted ->
+                    if (granted == true) {
+                    }
+                }
+            )
             LaunchedEffect(key1 = true){
                 Log.d("DM","request start")
+                launcher.launch(Manifest.permission.CAMERA)
                 if (intent.hasExtra("date")) {
                     date = intent.getLongExtra("date",date)
                     images = manager.getDocument(date).images
@@ -117,6 +164,22 @@ class ScannerActivity : ComponentActivity() {
                         Row (
                             modifier = Modifier.padding(5.dp),
                         ) {
+                            Button(onClick = {
+                                coroutineScope.launch {
+                                    val values = ContentValues()
+                                    values.put(MediaStore.Images.Media.TITLE, "New Picture")
+                                    values.put(MediaStore.Images.Media.DESCRIPTION, "From Camera")
+                                    cam_uri = context.contentResolver.insert(
+                                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                                        values
+                                    )
+                                    val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
+                                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cam_uri)
+                                    startCamera.launch(cameraIntent)
+                                }
+                            }) {
+                                 Text("Camera")
+                            }
                             Button(
                                 onClick = {
                                     //val scope = CoroutineScope(Job() + Dispatchers.IO)
@@ -150,7 +213,9 @@ class ScannerActivity : ComponentActivity() {
                             Spacer(modifier = Modifier.width(10.dp))
                             Text(
                                 text = status.value,
-                                modifier = Modifier.height(50.dp).wrapContentHeight(align = Alignment.CenterVertically)
+                                modifier = Modifier
+                                    .height(50.dp)
+                                    .wrapContentHeight(align = Alignment.CenterVertically)
                             )
                             when {
                                 openDialog.value -> {
