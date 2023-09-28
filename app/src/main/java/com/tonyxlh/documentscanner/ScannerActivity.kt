@@ -75,28 +75,18 @@ class ScannerActivity : ComponentActivity() {
             val manager = DocumentManager(context)
             LaunchedEffect(key1 = true){
                 Log.d("DM","request start")
-                Thread {
-                    try {
-                        var newScanners = mutableStateListOf<Scanner>()
-                        service.getScanners().forEach {
-                            newScanners.add(it)
-                        }
-                        scanners = newScanners
-                        if (scanners.size>0) {
-                            var pixelType = CapabilitySetup()
-                            pixelType.capability=257
-                            pixelType.curValue=0
-                            pixelType.exception="ignore"
-                            scanConfig = ScanConfig(scanners.get(0),
-                                DeviceConfiguration(),
-                                pixelType
-                            )
-                        }
-                        Log.d("DM", scanners.size.toString())
-                    }catch (e:Exception){
-                        Log.d("DM",e.stackTraceToString())
-                    }
-                }.start()
+                var scannersFound = loadScanners()
+                scanners = scannersFound
+                if (scanners.size>0) {
+                    var pixelType = CapabilitySetup()
+                    pixelType.capability=257
+                    pixelType.curValue=0
+                    pixelType.exception="ignore"
+                    scanConfig = ScanConfig(scanners.get(0),
+                        DeviceConfiguration(),
+                        pixelType
+                    )
+                }
             }
             DocumentScannerTheme {
                 val deleteConfirmationAlertDialog = remember { mutableStateOf(false) }
@@ -190,6 +180,22 @@ class ScannerActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    fun loadScanners():MutableList<Scanner>{
+        var newScanners = mutableListOf<Scanner>()
+        val thread = Thread {
+            try {
+                service.getScanners().forEach {
+                    newScanners.add(it)
+                }
+            }catch (e:Exception){
+                Log.d("DM",e.stackTraceToString())
+            }
+        }
+        thread.start()
+        thread.join()
+        return newScanners
     }
 
     fun scan(): MutableList<Bitmap> {
