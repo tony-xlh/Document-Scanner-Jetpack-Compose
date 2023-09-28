@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -149,13 +150,13 @@ fun DocumentItem(date:Long,manager: DocumentManager,onDeleted: (date:Long) -> Un
                 .clip(CircleShape)
                 .border(1.5.dp, MaterialTheme.colorScheme.secondary, CircleShape)
         )
-
         Spacer(modifier = Modifier.width(8.dp))
-
         Text(
             text = formattedDate(date),
             color = MaterialTheme.colorScheme.secondary
         )
+        //https://stackoverflow.com/questions/71594277/how-to-set-component-at-end-of-row-in-jetpack-compose
+        Spacer(Modifier.weight(1f).fillMaxHeight())
         IconButton(
             onClick = {
                 deleteConfirmationAlertDialog = true
