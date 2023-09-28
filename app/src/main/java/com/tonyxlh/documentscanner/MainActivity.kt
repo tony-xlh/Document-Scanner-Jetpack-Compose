@@ -36,6 +36,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -47,9 +48,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import com.tonyxlh.docscan4j.Scanner
 import com.tonyxlh.documentscanner.ui.theme.DocumentScannerTheme
 import java.text.SimpleDateFormat
@@ -64,9 +68,26 @@ class MainActivity : ComponentActivity() {
         setContent {
             DocumentScannerTheme {
                 val context = LocalContext.current
+                val lifecycleOwner = LocalLifecycleOwner.current
                 val manager = DocumentManager(context)
-                LaunchedEffect(key1 = true){
-                    documentTimestamps = manager.listDocuments()
+
+                DisposableEffect(lifecycleOwner) {
+                    // Create an observer that triggers our remembered callbacks
+                    // for sending analytics events
+                    val observer = LifecycleEventObserver { _, event ->
+                        if (event == Lifecycle.Event.ON_START) {
+                            Log.d("DM","on start")
+                            documentTimestamps = manager.listDocuments()
+                        }
+                    }
+
+                    // Add the observer to the lifecycle
+                    lifecycleOwner.lifecycle.addObserver(observer)
+
+                    // When the effect leaves the Composition, remove the observer
+                    onDispose {
+                        lifecycleOwner.lifecycle.removeObserver(observer)
+                    }
                 }
                 // A surface container using the 'background' color from the theme
                 Surface(
