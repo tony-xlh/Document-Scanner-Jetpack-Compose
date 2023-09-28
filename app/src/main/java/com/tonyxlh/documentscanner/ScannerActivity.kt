@@ -121,7 +121,7 @@ class ScannerActivity : ComponentActivity() {
                                         newImages.add(it)
                                     }
                                     images = newImages
-
+                                    saveDocument(manager,images)
                                 }
                             ){
                                 Text("Scan")
@@ -134,13 +134,6 @@ class ScannerActivity : ComponentActivity() {
                                 Icon(imageVector = Icons.Default.Settings, contentDescription = null)
                             }
                             Spacer(modifier = Modifier.width(10.dp))
-                            Button(
-                                onClick = {
-                                    saveDocument(manager,images)
-                                    Toast.makeText(context,"Saved",Toast.LENGTH_SHORT).show()
-                            }) {
-                                Text("Save")
-                            }
                             when {
                                 openDialog.value -> {
                                     ScannerSettingsDialog({
