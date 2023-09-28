@@ -74,4 +74,19 @@ class DocumentManager {
             documentFolder.delete()
         }
     }
+
+    fun getFirstDocumentImage(date:Long):ImageBitmap?{
+        var externalFilesDir = context.getExternalFilesDir("")
+        var documentFolder = File(externalFilesDir,"doc-"+date.toString())
+        if (documentFolder.exists()) {
+            documentFolder.listFiles().forEach {
+                if (it.name.endsWith(".jpg")) {
+                    val bytes = it.readBytes()
+                    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    return bitmap.asImageBitmap()
+                }
+            }
+        }
+        return null
+    }
 }

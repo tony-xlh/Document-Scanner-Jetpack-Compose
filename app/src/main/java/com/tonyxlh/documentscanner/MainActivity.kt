@@ -76,7 +76,7 @@ class MainActivity : ComponentActivity() {
                                 },
                             )
                             documentTimestamps.forEach { timestamp ->
-                                DocumentItem(timestamp)
+                                DocumentItem(timestamp,manager)
                             }
                         }
                         FloatingActionButton(
@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun DocumentItem(date:Long) {
+fun DocumentItem(date:Long,manager: DocumentManager) {
     Row(modifier = Modifier
         .padding(all = 8.dp)
         .fillMaxWidth()
@@ -106,7 +106,7 @@ fun DocumentItem(date:Long) {
            Log.d("DBR","item clicked");
         })) {
         Image(
-            painter = painterResource(R.drawable.thumbnail),
+            bitmap = manager.getFirstDocumentImage(date)!!,
             contentDescription = null,
             modifier = Modifier
                 .size(40.dp)
