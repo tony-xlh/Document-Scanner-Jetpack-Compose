@@ -67,7 +67,7 @@ class ScannerActivity : ComponentActivity() {
     var date = Date().time
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        var images by mutableStateOf(emptyList<ImageBitmap>())
+        var images by mutableStateOf(emptyList<String>())
         var openDialog = mutableStateOf(false)
         var scanners by mutableStateOf(emptyList<Scanner>())
         var selectedImageIndex:Int = -1
@@ -112,13 +112,13 @@ class ScannerActivity : ComponentActivity() {
                             Button(
                                 onClick = {
                                     Log.d("DM",scanConfig.toString())
-                                    val scanned = scan()
-                                    var newImages = mutableStateListOf<ImageBitmap>()
+                                    val scanned = scan(manager)
+                                    var newImages = mutableListOf<String>()
                                     images.forEach {
                                         newImages.add(it)
                                     }
                                     scanned.forEach {
-                                        newImages.add(it.asImageBitmap())
+                                        newImages.add(it)
                                     }
                                     images = newImages
 
@@ -159,7 +159,7 @@ class ScannerActivity : ComponentActivity() {
                         LazyColumn {
                             items(images.size){
                                 Image(
-                                    bitmap = images.get(it),
+                                    bitmap = manager.readFileAsImageBitmapByName(date,images.get(it)),
                                     contentDescription = "",
                                     modifier = Modifier
                                         .padding(10.dp)
@@ -179,7 +179,7 @@ class ScannerActivity : ComponentActivity() {
                                     {
 
                                         deleteConfirmationAlertDialog.value = false
-                                        var newImages = mutableStateListOf<ImageBitmap>()
+                                        var newImages = mutableStateListOf<String>()
                                         for (i in 0..images.size-1) {
                                             if (i != selectedImageIndex) {
                                                 newImages.add(images.get(i))
@@ -211,16 +211,16 @@ class ScannerActivity : ComponentActivity() {
         return newScanners
     }
 
-    fun scan(): MutableList<Bitmap> {
-        var images = mutableListOf<Bitmap>();
+    fun scan(manager: DocumentManager): MutableList<String> {
+        var images = mutableListOf<String>();
         val t = Thread {
             var caps = Capabilities()
             caps.capabilities.add(scanConfig!!.pixelType)
             val jobID = service.createScanJob(scanConfig!!.scanner,scanConfig!!.deviceConfig,caps)
             var image = service.nextDocument(jobID)
             while (image != null) {
-                val bitmap = BitmapFactory.decodeByteArray(image, 0, image.size)
-                images.add(bitmap)
+                val name = manager.saveOneImage(date, image)
+                images.add(name)
                 image = service.nextDocument(jobID)
             }
         }
@@ -228,6 +228,7 @@ class ScannerActivity : ComponentActivity() {
         t.join()
         return images
     }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

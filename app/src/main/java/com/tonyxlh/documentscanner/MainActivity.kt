@@ -142,7 +142,7 @@ fun DocumentItem(date:Long,manager: DocumentManager,onDeleted: (date:Long) -> Un
             context.startActivity(intent)
         })) {
         Image(
-            bitmap = manager.getFirstDocumentImage(date)!!,
+            bitmap = manager.getFirstDocumentImage(date),
             contentDescription = null,
             modifier = Modifier
                 .size(40.dp)
