@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -79,6 +80,7 @@ class ScannerActivity : ComponentActivity() {
         var openDialog = mutableStateOf(false)
         var scanners by mutableStateOf(emptyList<Scanner>())
         var selectedImageIndex:Int = -1
+        var status = mutableStateOf("")
         setContent {
             val context = LocalContext.current
             val manager = DocumentManager(context)
@@ -118,6 +120,7 @@ class ScannerActivity : ComponentActivity() {
                             Button(
                                 onClick = {
                                     //val scope = CoroutineScope(Job() + Dispatchers.IO)
+                                    status.value = "Scanning..."
                                     coroutineScope.launch {
                                         Log.d("DM",scanConfig.toString())
                                         val scanned = scan(manager)
@@ -131,6 +134,7 @@ class ScannerActivity : ComponentActivity() {
                                         images = newImages
                                         saveDocument(manager,images)
                                         listState.animateScrollToItem(index = images.size - 1)
+                                        status.value = ""
                                     }
                                 }
                             ){
@@ -144,6 +148,10 @@ class ScannerActivity : ComponentActivity() {
                                 Icon(imageVector = Icons.Default.Settings, contentDescription = null)
                             }
                             Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = status.value,
+                                modifier = Modifier.height(50.dp).wrapContentHeight(align = Alignment.CenterVertically)
+                            )
                             when {
                                 openDialog.value -> {
                                     ScannerSettingsDialog({
