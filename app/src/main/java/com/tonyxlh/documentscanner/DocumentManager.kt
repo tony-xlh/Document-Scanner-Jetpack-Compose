@@ -129,9 +129,14 @@ class DocumentManager {
         if (documentFolder.exists()) {
             val file = File(documentFolder,name)
             if (file.exists()) {
-                val bytes = file.readBytes()
-                val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
-                return bitmap.asImageBitmap()
+                try {
+                    val bytes = file.readBytes()
+                    val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+                    return bitmap.asImageBitmap()
+                }catch (e:Exception){
+                    e.printStackTrace()
+                }
+
             }
         }
         return getEmptyThumbNail()
