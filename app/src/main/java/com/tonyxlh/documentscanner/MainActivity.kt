@@ -1,5 +1,6 @@
 package com.tonyxlh.documentscanner
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -8,7 +9,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,17 +17,13 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -40,26 +36,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import com.tonyxlh.docscan4j.Scanner
+import com.dynamsoft.license.LicenseManager
 import com.tonyxlh.documentscanner.ui.theme.DocumentScannerTheme
 import java.text.SimpleDateFormat
-import java.time.format.DateTimeFormatter
 import java.util.Date
+
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -71,7 +63,9 @@ class MainActivity : ComponentActivity() {
                 val context = LocalContext.current
                 val lifecycleOwner = LocalLifecycleOwner.current
                 val manager = DocumentManager(context)
-
+                LaunchedEffect(key1 = true){
+                    initLicense(context)
+                }
                 DisposableEffect(lifecycleOwner) {
                     // Create an observer that triggers our remembered callbacks
                     // for sending analytics events
@@ -127,6 +121,19 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    private fun initLicense(context: Context){
+        LicenseManager.initLicense(
+            "DLS2eyJoYW5kc2hha2VDb2RlIjoiMjAwMDAxLTE2NDk4Mjk3OTI2MzUiLCJvcmdhbml6YXRpb25JRCI6IjIwMDAwMSIsInNlc3Npb25QYXNzd29yZCI6IndTcGR6Vm05WDJrcEQ5YUoifQ==",
+            context
+        ) { isSuccess, error ->
+            if (!isSuccess) {
+                Log.e("DYM", "InitLicense Error: $error")
+            }else{
+                Log.e("DYM", "InitLicense success")
+            }
+        }
+    }
 }
 
 @Composable
@@ -157,7 +164,10 @@ fun DocumentItem(date:Long,manager: DocumentManager,onDeleted: (date:Long) -> Un
             color = MaterialTheme.colorScheme.secondary
         )
         //https://stackoverflow.com/questions/71594277/how-to-set-component-at-end-of-row-in-jetpack-compose
-        Spacer(Modifier.weight(1f).fillMaxHeight())
+        Spacer(
+            Modifier
+                .weight(1f)
+                .fillMaxHeight())
         IconButton(
             onClick = {
                 deleteConfirmationAlertDialog = true
@@ -179,8 +189,6 @@ fun DocumentItem(date:Long,manager: DocumentManager,onDeleted: (date:Long) -> Un
                     },"Alert","Delete this document?")
             }
         }
-
-
     }
 }
 
