@@ -17,13 +17,9 @@ import java.io.InputStream
 
 class MediaCaptureActivity : AppCompatActivity() {
     var cam_uri: Uri? = null
-    var date: Long? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_media_capture)
-        if (intent.hasExtra("date")) {
-            date = intent.getLongExtra("date",0)
-        }
         var startCamera: ActivityResultLauncher<Intent> =
             registerForActivityResult(
                 ActivityResultContracts.StartActivityForResult(),

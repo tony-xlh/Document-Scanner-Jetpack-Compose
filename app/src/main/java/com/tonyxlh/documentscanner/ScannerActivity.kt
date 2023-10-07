@@ -163,7 +163,6 @@ class ScannerActivity : ComponentActivity() {
                             Button(onClick = {
                                 coroutineScope.launch {
                                     val intent = Intent(context, MediaCaptureActivity::class.java)
-                                    intent.putExtra("date",date)
                                     mediaCaptureLauncher.launch(intent)
                                 }
                             }) {
