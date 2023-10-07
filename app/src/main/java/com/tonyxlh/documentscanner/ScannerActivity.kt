@@ -1,22 +1,16 @@
 package com.tonyxlh.documentscanner
 
 import android.Manifest
-import android.R.attr.bitmap
-import android.content.ContentValues
 import android.content.Intent
-import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.ActivityResult
-import androidx.activity.result.ActivityResultCallback
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,6 +49,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.tonyxlh.docscan4j.Capabilities
@@ -70,7 +66,6 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.Date
 
-
 class ScannerActivity : ComponentActivity() {
     var scanConfig:ScanConfig? = null
     val service = DynamsoftService(
@@ -78,6 +73,7 @@ class ScannerActivity : ComponentActivity() {
         "t0068MgAAAEm8KzOlKD/AG56RuTf2RSTo4ajLgVpDBfQkmIJYY7yrDj3jbzQpRfQRzGnACr7S1F/7Da6REO20jmF3QR4VDXI="
     )
     var date = Date().time
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         var images by mutableStateOf(emptyList<String>())
@@ -87,7 +83,6 @@ class ScannerActivity : ComponentActivity() {
         var status = mutableStateOf("")
         val context = applicationContext
         val manager = DocumentManager(context)
-
         setContent {
             val listState = rememberLazyListState()
             val coroutineScope = rememberCoroutineScope()
@@ -150,7 +145,7 @@ class ScannerActivity : ComponentActivity() {
                 }
             }
             DocumentScannerTheme {
-                val deleteConfirmationAlertDialog = remember { mutableStateOf(false) }
+                val actionDialog = remember { mutableStateOf(false) }
                 // A surface container using the 'background' color from the theme
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -225,30 +220,48 @@ class ScannerActivity : ComponentActivity() {
                                         .padding(10.dp)
                                         .clickable() {
                                             selectedImageIndex = it
-                                            deleteConfirmationAlertDialog.value = true
+                                            actionDialog.value = true
                                         }
                                 )
                             }
                         }
                         when {
-                            deleteConfirmationAlertDialog.value -> {
-                                ConfirmationAlertDialog(
-                                    {
-                                        deleteConfirmationAlertDialog.value = false
-                                    },
-                                    {
-
-                                        deleteConfirmationAlertDialog.value = false
-                                        var newImages = mutableStateListOf<String>()
-                                        manager.deleteImage(date,images.get(selectedImageIndex))
-                                        for (i in 0..images.size-1) {
-                                            if (i != selectedImageIndex) {
-                                                newImages.add(images.get(i))
+                            actionDialog.value -> {
+                                Dialog(
+                                    onDismissRequest = { actionDialog.value = false }) {
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(150.dp)
+                                    ) {
+                                        Column(modifier = Modifier.padding(10.dp).align(Alignment.Start)) {
+                                            Text("Select an action")
+                                            TextButton( onClick = {
+                                                actionDialog.value = false
+                                                var newImages = mutableStateListOf<String>()
+                                                manager.deleteImage(date,images.get(selectedImageIndex))
+                                                for (i in 0..images.size-1) {
+                                                    if (i != selectedImageIndex) {
+                                                        newImages.add(images.get(i))
+                                                    }
+                                                }
+                                                images = newImages
+                                                saveDocument(manager,images)
+                                            }) {
+                                                Text(text = "Delete",
+                                                    textAlign = TextAlign.Left)
+                                            }
+                                            TextButton( onClick = {
+                                                actionDialog.value = false
+                                                Log.d("DYM","show editor")
+                                            }) {
+                                                Text(text = "Edit",
+                                                    textAlign = TextAlign.Left)
                                             }
                                         }
-                                        images = newImages
-                                        saveDocument(manager,images)
-                                    },"Alert","Delete this image?")
+
+                                    }
+                                }
                             }
                         }
                     }

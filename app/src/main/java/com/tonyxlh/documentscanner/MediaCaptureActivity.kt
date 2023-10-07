@@ -7,13 +7,10 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import java.io.ByteArrayOutputStream
-import java.io.InputStream
 
 class MediaCaptureActivity : AppCompatActivity() {
     var cam_uri: Uri? = null
