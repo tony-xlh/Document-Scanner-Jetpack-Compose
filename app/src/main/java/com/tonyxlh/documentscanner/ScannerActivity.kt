@@ -85,46 +85,10 @@ class ScannerActivity : ComponentActivity() {
         var scanners by mutableStateOf(emptyList<Scanner>())
         var selectedImageIndex:Int = -1
         var status = mutableStateOf("")
-        var cam_uri: Uri? = null
         val context = applicationContext
         val manager = DocumentManager(context)
-        var startCamera: ActivityResultLauncher<Intent> =
-            registerForActivityResult(
-                ActivityResultContracts.StartActivityForResult(),
-                ActivityResultCallback<ActivityResult> { result ->
-                    if (result.getResultCode() === RESULT_OK) {
-                        // There are no request codes
-                        Log.d("DM",cam_uri.toString())
-                        if (cam_uri != null) {
-                            val inp: InputStream? = contentResolver.openInputStream(cam_uri!!)
-                            if (inp != null) {
-                                val byteBuffer = ByteArrayOutputStream()
-                                val bufferSize = 1024
-                                val buffer = ByteArray(bufferSize)
-                                var len = 0
-                                while (inp.read(buffer).also { len = it } != -1) {
-                                    byteBuffer.write(buffer, 0, len)
-                                }
-                                val name = manager.saveOneImage(date,byteBuffer.toByteArray())
-                                var newImages = mutableListOf<String>()
-                                images.forEach {
-                                    newImages.add(it)
-                                }
-                                newImages.add(name)
-                                images = newImages
-                                saveDocument(manager,images)
-                                //listState.animateScrollToItem(index = images.size - 1)
-                            }
-                        }
-
-
-
-                    }
-                }
-            )
 
         setContent {
-
             val listState = rememberLazyListState()
             val coroutineScope = rememberCoroutineScope()
             val launcher = rememberLauncherForActivityResult(
@@ -134,25 +98,36 @@ class ScannerActivity : ComponentActivity() {
                     }
                 }
             )
-            val cameraLauncher =
-                rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) {
-                    if (it != null) {
-                        val stream = ByteArrayOutputStream()
-                        it!!.compress(Bitmap.CompressFormat.JPEG, 100, stream)
-                        val name = manager.saveOneImage(date,stream.toByteArray())
-                        var newImages = mutableListOf<String>()
-                        images.forEach {
-                            newImages.add(it)
+            val mediaCaptureLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.StartActivityForResult(),
+                onResult = { result ->
+                    val uriString = result.data?.getStringExtra("uri")
+                    if (result.resultCode == RESULT_OK) {
+                        val uri = Uri.parse(uriString)
+                        val inp: InputStream? = contentResolver.openInputStream(uri)
+                        if (inp != null) {
+                            val outputStream = ByteArrayOutputStream()
+                            inp.use { input ->
+                                outputStream.use { output ->
+                                    input.copyTo(output)
+                                }
+                            }
+                            val buffer = outputStream.toByteArray()
+                            val path = manager.saveOneImage(date,buffer)
+                            var newImages = mutableStateListOf<String>()
+                            for (i in 0..images.size-1) {
+                                newImages.add(images.get(i))
+                            }
+                            newImages.add(path)
+                            images = newImages
+                            saveDocument(manager,images)
+                            coroutineScope.launch {
+                                listState.animateScrollToItem(index = images.size - 1)
+                            }
                         }
-                        newImages.add(name)
-                        images = newImages
-                        saveDocument(manager,images)
-                        coroutineScope.launch{
-                            listState.animateScrollToItem(index = images.size - 1)
-                        }
-
-                    }
+                   }
                 }
+            )
             LaunchedEffect(key1 = true){
                 Log.d("DM","request start")
                 launcher.launch(Manifest.permission.CAMERA)
@@ -187,17 +162,9 @@ class ScannerActivity : ComponentActivity() {
                         ) {
                             Button(onClick = {
                                 coroutineScope.launch {
-                                    val values = ContentValues()
-                                    values.put(MediaStore.Images.Media.TITLE, "New Picture")
-                                    values.put(MediaStore.Images.Media.DESCRIPTION, "From Camera")
-                                    cam_uri = context.contentResolver.insert(
-                                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                                        values
-                                    )
-                                    val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-                                    cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cam_uri)
-                                    startCamera.launch(cameraIntent)
-                                    //cameraLauncher.launch(null)
+                                    val intent = Intent(context, MediaCaptureActivity::class.java)
+                                    intent.putExtra("date",date)
+                                    mediaCaptureLauncher.launch(intent)
                                 }
                             }) {
                                  Text("Camera")
