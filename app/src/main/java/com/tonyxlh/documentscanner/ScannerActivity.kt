@@ -123,6 +123,11 @@ class ScannerActivity : ComponentActivity() {
                    }
                 }
             )
+            val editorLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.StartActivityForResult(),
+                onResult = { result ->
+                }
+            )
             LaunchedEffect(key1 = true){
                 Log.d("DM","request start")
                 launcher.launch(Manifest.permission.CAMERA)
@@ -253,6 +258,10 @@ class ScannerActivity : ComponentActivity() {
                                             }
                                             TextButton( onClick = {
                                                 actionDialog.value = false
+                                                val intent = Intent(context, EditorActivity::class.java)
+                                                intent.putExtra("filename",images.get(selectedImageIndex))
+                                                intent.putExtra("date",date)
+                                                editorLauncher.launch(intent)
                                                 Log.d("DYM","show editor")
                                             }) {
                                                 Text(text = "Edit",

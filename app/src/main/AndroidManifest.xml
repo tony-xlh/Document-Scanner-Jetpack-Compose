@@ -23,9 +23,14 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".EditorActivity"
+            android:exported="false"
+            android:label="@string/title_activity_editor"
+            android:theme="@style/Theme.DocumentScanner" />
+        <activity
             android:name=".MediaCaptureActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name=".ScannerActivity"
             android:exported="false"
