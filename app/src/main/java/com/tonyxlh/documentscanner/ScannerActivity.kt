@@ -126,6 +126,10 @@ class ScannerActivity : ComponentActivity() {
             val editorLauncher = rememberLauncherForActivityResult(
                 contract = ActivityResultContracts.StartActivityForResult(),
                 onResult = { result ->
+                    if (result.resultCode == RESULT_OK) {
+                        status.value = "Reloading...";
+                        status.value = "";
+                    }
                 }
             )
             LaunchedEffect(key1 = true){

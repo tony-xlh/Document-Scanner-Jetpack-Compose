@@ -136,7 +136,6 @@ class DocumentManager {
                 }catch (e:Exception){
                     e.printStackTrace()
                 }
-
             }
         }
         return getEmptyThumbNail()
@@ -152,6 +151,48 @@ class DocumentManager {
         imageFile.createNewFile()
         imageFile.writeBytes(image)
         return imageFile.name
+    }
+    fun replaceOneImage(date:Long,filename:String,image:ByteArray){
+        var externalFilesDir = context.getExternalFilesDir("")
+        var documentFolder = File(externalFilesDir,"doc-"+date.toString())
+        var imageFile = File(documentFolder, filename)
+        if (imageFile.exists()) {
+            imageFile.delete()
+            imageFile.createNewFile()
+            imageFile.writeBytes(image)
+        }
+    }
+    fun saveOriginalImage(date:Long,filename:String,image:ByteArray):String{
+        var externalFilesDir = context.getExternalFilesDir("")
+        var documentFolder = File(externalFilesDir,"doc-"+date.toString())
+        if (!documentFolder.exists()) {
+            documentFolder.mkdir()
+        }
+        var imageFile = File(documentFolder, filename+"-original")
+        imageFile.createNewFile()
+        imageFile.writeBytes(image)
+        return imageFile.name
+    }
+
+    fun getOriginalImage(date:Long,filename:String):ImageBitmap{
+        var externalFilesDir = context.getExternalFilesDir("")
+        var documentFolder = File(externalFilesDir,"doc-"+date.toString())
+        var imageFile = File(documentFolder, filename)
+        var originalFile = File(documentFolder, filename+"-original")
+        var targetFile:File
+        if (originalFile.exists()) {
+            targetFile = originalFile
+        }else{
+            targetFile = imageFile
+        }
+        try {
+            val bytes = targetFile.readBytes()
+            val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+            return bitmap.asImageBitmap()
+        }catch (e:Exception){
+            e.printStackTrace()
+        }
+        return getEmptyThumbNail()
     }
 
     fun deleteImage(date:Long,name:String) {
