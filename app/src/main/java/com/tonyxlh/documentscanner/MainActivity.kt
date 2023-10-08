@@ -3,6 +3,7 @@ package com.tonyxlh.documentscanner
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -50,6 +51,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.dynamsoft.license.LicenseManager
 import com.tonyxlh.documentscanner.ui.theme.DocumentScannerTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -129,7 +133,9 @@ class MainActivity : ComponentActivity() {
             context
         ) { isSuccess, error ->
             if (!isSuccess) {
-                Toast.makeText(applicationContext,"License invalid: $error",Toast.LENGTH_SHORT).show()
+                Looper.prepare();
+                Toast.makeText(applicationContext,"License invalid: $error",Toast.LENGTH_LONG).show()
+                Looper.loop();
                 Log.e("DYM", "InitLicense Error: $error")
             }else{
                 Log.e("DYM", "InitLicense success")
