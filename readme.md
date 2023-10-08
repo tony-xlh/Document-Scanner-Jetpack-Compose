@@ -17,3 +17,15 @@ You may need to apply for licenses to use it.
 
 Demo videos:
 
+1. Capture from document scanners.
+
+    https://github.com/tony-xlh/Document-Scanner-Jetpack-Compose/assets/5462205/d65c6db8-29ff-4142-9b44-f8dc45cefbde
+
+2. Capture an image from the camera and edit it.
+
+    https://github.com/tony-xlh/Document-Scanner-Jetpack-Compose/assets/5462205/d7251596-d1d8-45c3-9952-8c4224b88fff
+
+
+
+
+
