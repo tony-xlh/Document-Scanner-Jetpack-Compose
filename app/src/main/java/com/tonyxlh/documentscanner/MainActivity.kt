@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -128,6 +129,7 @@ class MainActivity : ComponentActivity() {
             context
         ) { isSuccess, error ->
             if (!isSuccess) {
+                Toast.makeText(applicationContext,"License invalid: $error",Toast.LENGTH_SHORT).show()
                 Log.e("DYM", "InitLicense Error: $error")
             }else{
                 Log.e("DYM", "InitLicense success")

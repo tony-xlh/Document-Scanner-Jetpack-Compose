@@ -122,11 +122,9 @@ class EditorActivity : ComponentActivity() {
     }
 
     private fun detectQuad(bitmap:Bitmap){
-        Log.d("DYM","detect")
         val router = CaptureVisionRouter(applicationContext);
         val result = router.capture(bitmap,EnumPresetTemplate.PT_DETECT_DOCUMENT_BOUNDARIES)
         if (result != null) {
-            Log.d("DYM","size:"+result.items.size)
             result.items.forEach{
                 val quad: DetectedQuadResultItem = it as DetectedQuadResultItem
                 addQuadDrawingItem(quad.location)

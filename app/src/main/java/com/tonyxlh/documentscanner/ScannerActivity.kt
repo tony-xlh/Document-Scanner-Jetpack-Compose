@@ -70,7 +70,7 @@ class ScannerActivity : ComponentActivity() {
     var scanConfig:ScanConfig? = null
     val service = DynamsoftService(
         "http://192.168.8.65:18622",
-        "t0068MgAAAEm8KzOlKD/AG56RuTf2RSTo4ajLgVpDBfQkmIJYY7yrDj3jbzQpRfQRzGnACr7S1F/7Da6REO20jmF3QR4VDXI="
+        "t0197AgYAAELwtZvPRa5XXgxKcj7I7fFnTkjMjpt5zk+u9+7e7yCKK9pugkd3b39fYqBjMz7Es6LPiCuij88WCYjk2Y3RXhfzcN27e11puY1WmmgFTbTURst3tcCw3Pbl+7v/1DyHMzAugKwbZAVIA6WcHfDxtTyyALYAMQCxaiALOF1F6r/TDWTsI6PfGv3HpZMbOOV5p07KM05q4ORbzhSQkEIxp9VOBSC9czYAW4CcAlR/aoeAYA+wBcgBGEIU71z8AiKlNBM="
     )
     var date = Date().time
 
@@ -188,7 +188,9 @@ class ScannerActivity : ComponentActivity() {
                                         }
                                         images = newImages
                                         saveDocument(manager,images)
-                                        listState.animateScrollToItem(index = images.size - 1)
+                                        if (images.size>0) {
+                                            listState.animateScrollToItem(index = images.size - 1)
+                                        }
                                         status.value = ""
                                     }
                                 }
