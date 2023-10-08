@@ -28,8 +28,8 @@ class MediaCaptureActivity : AppCompatActivity() {
                             val data = Intent().apply { putExtra("uri", cam_uri.toString()) }
                             setResult(RESULT_OK, data)
                         }
-                        finish()
                     }
+                    finish()
                 }
             )
         val values = ContentValues()
