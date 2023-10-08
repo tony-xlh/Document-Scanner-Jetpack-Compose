@@ -1,6 +1,7 @@
 package com.tonyxlh.documentscanner
 
 import android.graphics.Bitmap
+import android.graphics.Point
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
@@ -135,8 +136,20 @@ class EditorActivity : ComponentActivity() {
             addQuadDrawingItems(result)
         }
         if (result == null || result.items.size == 0) {
-            Toast.makeText(applicationContext,"No documents detected.",Toast.LENGTH_SHORT).show()
+            //create a drawing item for the user to adjust
             val drawingItems = ArrayList<DrawingItem<*>>()
+            val left = (bitmap.width*0.1).toInt()
+            val right = (bitmap.width*0.9).toInt()
+            val top = (bitmap.height*0.2).toInt()
+            val bottom = (bitmap.height*0.6).toInt()
+            val point1 = Point(left,top)
+            val point2 = Point(right,top)
+            val point3 = Point(right,bottom)
+            val point4 = Point(left,bottom)
+            val quad = Quadrilateral(point1,point2,point3,point4)
+            drawingItems.add(QuadDrawingItem(quad))
+            editorView.getDrawingLayer(DrawingLayer.DDN_LAYER_ID).drawingItems = drawingItems
+            Toast.makeText(applicationContext,"No documents detected.",Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -146,6 +159,6 @@ class EditorActivity : ComponentActivity() {
             val quad: DetectedQuadResultItem = it as DetectedQuadResultItem
             drawingItems.add(QuadDrawingItem(quad.location))
         }
-        editorView.getDrawingLayer(DrawingLayer.DDN_LAYER_ID).setDrawingItems(drawingItems)
+        editorView.getDrawingLayer(DrawingLayer.DDN_LAYER_ID).drawingItems = drawingItems
     }
 }
