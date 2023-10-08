@@ -3,6 +3,7 @@ package com.tonyxlh.documentscanner
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.viewinterop.AndroidView
+import com.dynamsoft.core.basic_structures.CapturedResult
 import com.dynamsoft.core.basic_structures.Quadrilateral
 import com.dynamsoft.cvr.CaptureVisionRouter
 import com.dynamsoft.cvr.EnumPresetTemplate
@@ -130,18 +132,20 @@ class EditorActivity : ComponentActivity() {
         val router = CaptureVisionRouter(applicationContext);
         val result = router.capture(bitmap,EnumPresetTemplate.PT_DETECT_DOCUMENT_BOUNDARIES)
         if (result != null) {
-            result.items.forEach{
-                val quad: DetectedQuadResultItem = it as DetectedQuadResultItem
-                addQuadDrawingItem(quad.location)
-            }
+            addQuadDrawingItems(result)
+        }
+        if (result == null || result.items.size == 0) {
+            Toast.makeText(applicationContext,"No documents detected.",Toast.LENGTH_SHORT).show()
+            val drawingItems = ArrayList<DrawingItem<*>>()
         }
     }
 
-    private fun addQuadDrawingItem(quad:Quadrilateral){
+    private fun addQuadDrawingItems(result:CapturedResult){
         val drawingItems = ArrayList<DrawingItem<*>>()
-        drawingItems.add(QuadDrawingItem(quad))
+        result.items.forEach{
+            val quad: DetectedQuadResultItem = it as DetectedQuadResultItem
+            drawingItems.add(QuadDrawingItem(quad.location))
+        }
         editorView.getDrawingLayer(DrawingLayer.DDN_LAYER_ID).setDrawingItems(drawingItems)
-        Log.d("DYM","top:"+quad.boundingRect.top)
-        Log.d("DYM","add drawing item")
     }
 }
