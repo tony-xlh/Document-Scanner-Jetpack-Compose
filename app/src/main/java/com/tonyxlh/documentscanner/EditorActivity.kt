@@ -97,7 +97,12 @@ class EditorActivity : ComponentActivity() {
     }
 
     private fun normalizedImage():Bitmap{
-        val quadDrawingItem = editorView.selectedDrawingItem as QuadDrawingItem
+        var quadDrawingItem:QuadDrawingItem
+        if (editorView.selectedDrawingItem != null) {
+            quadDrawingItem = editorView.selectedDrawingItem as QuadDrawingItem
+        }else{
+            quadDrawingItem = editorView.getDrawingLayer(DrawingLayer.DDN_LAYER_ID).drawingItems.get(0) as QuadDrawingItem
+        }
         val router = CaptureVisionRouter(applicationContext);
         val settings = router.getSimplifiedSettings(EnumPresetTemplate.PT_NORMALIZE_DOCUMENT)
         settings.roi = quadDrawingItem.quad
