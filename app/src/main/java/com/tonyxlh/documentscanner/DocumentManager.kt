@@ -195,12 +195,18 @@ class DocumentManager {
         return getEmptyThumbNail()
     }
 
-    fun deleteImage(date:Long,name:String) {
+    fun deleteImage(date:Long,filename:String) {
         var externalFilesDir = context.getExternalFilesDir("")
         var documentFolder = File(externalFilesDir,"doc-"+date.toString())
         if (documentFolder.exists()) {
-            var imageFile = File(documentFolder, name)
-            imageFile.delete()
+            var imageFile = File(documentFolder, filename)
+            var originalFile = File(documentFolder, filename+"-original")
+            if (imageFile.exists()) {
+                imageFile.delete()
+            }
+            if (originalFile.exists()) {
+                originalFile.delete()
+            }
         }
     }
 }
